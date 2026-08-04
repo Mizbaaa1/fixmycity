@@ -1,16 +1,178 @@
+/* Main application */
+.app {
+  min-height: 100vh;
+  background: #f5f7fa;
+}
+
+/* Hero section */
+.hero-section {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 100px 20px 60px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  text-align: center;
+}
+
+/* Hero content */
+.content {
+  width: 100%;
+  max-width: 700px;
+
+  background: white;
+  padding: 50px;
+
+  border-radius: 16px;
+
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* Main title */
+.title {
+  font-size: 42px;
+  margin-bottom: 20px;
+  color: #1f2937;
+}
+
+/* Main description */
+.description {
+  font-size: 18px;
+  color: #6b7280;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+/* Buttons */
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.report-btn {
+  background: #2563eb;
+  color: white;
+}
+
+.login-btn {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+/* How It Works */
+.how-it-works {
+  background: white;
+  padding: 80px 40px;
+  text-align: center;
+}
+
+.how-it-works h2 {
+  font-size: 32px;
+  color: #1f2937;
+  margin-bottom: 10px;
+}
+
+/* How It Works description */
+.section-description {
+  color: #6b7280;
+  font-size: 17px;
+  margin-bottom: 40px;
+}
+
+/* Four cards */
+.steps-container {
+  width: 100%;
+  max-width: 1100px;
+
+  margin: 0 auto;
+
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+
+  gap: 25px;
+}
+
+/* Individual card */
+.step-card {
+  padding: 30px 20px;
+
+  background: #f8fafc;
+
+  border-radius: 12px;
+
+  border: 1px solid #e5e7eb;
+}
+
+/* Number circle */
+.step-number {
+  width: 45px;
+  height: 45px;
+
+  margin: 0 auto 20px;
+
+  border-radius: 50%;
+
+  background: #2563eb;
+  color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/* Card heading */
+.step-card h3 {
+  color: #1f2937;
+  margin-bottom: 12px;
+}
+
+/* Card description */
+.step-card p {
+  color: #6b7280;
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+/* Navigation Bar */
 .navbar {
   position: fixed;
   top: 0;
   left: 0;
+
   width: 100%;
   height: 70px;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
+
   padding: 0 40px;
   box-sizing: border-box;
+
   background: white;
+
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+
+  z-index: 1000;
 }
 
 .logo {
@@ -33,65 +195,116 @@
 .nav-links a:hover {
   color: #2563eb;
 }
+/* Login Page */
 
-.app {
+.login-page {
   min-height: 100vh;
   padding-top: 70px;
-  box-sizing: border-box;
+
   display: flex;
   justify-content: center;
   align-items: center;
-  text-align: center;
+
   background: #f5f7fa;
-  padding-left: 20px;
-  padding-right: 20px;
 }
 
-.content {
-  max-width: 700px;
+.login-card {
+  width: 100%;
+  max-width: 420px;
+
   background: white;
-  padding: 50px;
+
+  padding: 40px;
+
   border-radius: 16px;
+
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+
+  box-sizing: border-box;
 }
 
-.title {
-  font-size: 42px;
-  margin-bottom: 20px;
+.login-card h1 {
+  text-align: center;
+
   color: #1f2937;
+
+  margin-bottom: 10px;
 }
 
-.description {
-  font-size: 18px;
+.login-description {
+  text-align: center;
+
   color: #6b7280;
-  line-height: 1.6;
+
   margin-bottom: 30px;
 }
 
-.button-group {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
+.form-group {
+  margin-bottom: 20px;
 }
 
-.btn {
-  padding: 12px 24px;
-  border: none;
+.form-group label {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: #374151;
+
+  font-weight: 500;
+}
+
+.form-group input {
+  width: 100%;
+
+  padding: 12px;
+
+  border: 1px solid #d1d5db;
+
   border-radius: 8px;
+
   font-size: 16px;
+
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  outline: none;
+
+  border-color: #2563eb;
+}
+
+.login-submit {
+  width: 100%;
+
+  padding: 12px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: #2563eb;
+
+  color: white;
+
+  font-size: 16px;
+
   cursor: pointer;
 }
 
-.report-btn {
-  background: #2563eb;
-  color: white;
-}
-
-.login-btn {
-  background: #e5e7eb;
-  color: #111827;
-}
-
-.btn:hover {
+.login-submit:hover {
   opacity: 0.9;
+}
+
+.register-text {
+  text-align: center;
+
+  margin-top: 25px;
+
+  color: #6b7280;
+}
+
+.register-text a {
+  color: #2563eb;
+
+  text-decoration: none;
 }
