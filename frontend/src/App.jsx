@@ -2,6 +2,7 @@ import "./App.css";
 import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ReportIssue from "./pages/ReportIssue";
 import { Routes, Route } from "react-router-dom";
 
 function Home() {
@@ -99,7 +100,9 @@ function App() {
 
       <Route path="/login" element={<Login />} />
       
-      <Route path="/register" element={<Register />} />   
+      <Route path="/register" element={<Register />} /> 
+
+      <Route path="/report" element={<ReportIssue />} />  
     </Routes>
   );
 }
