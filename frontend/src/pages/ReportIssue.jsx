@@ -47,22 +47,48 @@ function ReportIssue() {
     );
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const handleSubmit = async (event) => {
+  event.preventDefault();
 
-    if (!title || !category || !description) {
-      alert("Please fill in all required fields.");
-      return;
+  if (!title || !category || !description) {
+    alert("Please fill in all required fields.");
+    return;
+  }
+
+  if (!location) {
+    alert("Please get your GPS location.");
+    return;
+  }
+
+  try {
+    const response = await fetch("http://127.0.0.1:5000/api/issues", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: title,
+        category: category,
+        description: description,
+        latitude: location.latitude,
+        longitude: location.longitude,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      console.log("Backend response:", data);
+      setSubmitted(true);
+      alert("Civic issue submitted successfully!");
+    } else {
+      alert("Failed to submit the issue.");
     }
-
-    if (!location) {
-      alert("Please get your GPS location.");
-      return;
-    }
-
-    setSubmitted(true);
-  };
-
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Cannot connect to the backend.");
+  }
+};
   return (
     <div className="report-page">
       <div className="report-card">
