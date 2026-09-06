@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import ReportIssue from "./pages/ReportIssue";
 import { Routes, Route } from "react-router-dom";
 import TrackComplaint from "./pages/TrackComplaint";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function Home() {
   return (
@@ -106,6 +107,8 @@ function App() {
       <Route path="/report" element={<ReportIssue />} /> 
 
       <Route path="/track" element={<TrackComplaint />} /> 
+
+      <Route path="/admin" element={<AdminDashboard />} />
     </Routes>
   );
 }
