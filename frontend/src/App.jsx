@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ReportIssue from "./pages/ReportIssue";
 import { Routes, Route } from "react-router-dom";
+import TrackComplaint from "./pages/TrackComplaint";
 
 function Home() {
   return (
@@ -102,7 +103,9 @@ function App() {
       
       <Route path="/register" element={<Register />} /> 
 
-      <Route path="/report" element={<ReportIssue />} />  
+      <Route path="/report" element={<ReportIssue />} /> 
+
+      <Route path="/track" element={<TrackComplaint />} /> 
     </Routes>
   );
 }

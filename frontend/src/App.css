@@ -195,6 +195,7 @@
 .nav-links a:hover {
   color: #2563eb;
 }
+
 /* Login Page */
 
 .login-page {
@@ -412,6 +413,7 @@
 .report-submit:hover {
   opacity: 0.9;
 }
+
 /* GPS Location */
 
 .location-button {
@@ -471,4 +473,95 @@
 
 .success-message h3 {
   margin-top: 0;
+}
+
+/* Track Complaints Page */
+
+.track-page {
+  padding: 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.track-page h1 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.track-description {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.complaints-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.complaint-card {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.complaint-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.complaint-header h2 {
+  margin: 0;
+}
+
+.status {
+  background: #fff3cd;
+  color: #856404;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: bold;
+}
+
+.complaint-card p {
+  margin: 10px 0;
+}
+
+/* Status Dropdown */
+
+.status-select {
+  padding: 7px 12px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  font-weight: bold;
+  cursor: pointer;
+  background: #fff3cd;
+  color: #856404;
+}
+.status-submitted {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-verified {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.status-assigned {
+  background: #e2d9f3;
+  color: #4a2c6d;
+}
+
+.status-in-progress {
+  background: #ffe5cc;
+  color: #8a4b08;
+}
+
+.status-resolved {
+  background: #d4edda;
+  color: #155724;
 }
