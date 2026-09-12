@@ -2,10 +2,13 @@ import "./App.css";
 import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+
 import ReportIssue from "./pages/ReportIssue";
 import { Routes, Route } from "react-router-dom";
+import ProtectedRoute from "./ProtectedRoute";
 import TrackComplaint from "./pages/TrackComplaint";
 import AdminDashboard from "./pages/AdminDashboard";
+import DepartmentDashboard from "./pages/DepartmentDashboard";
 
 function Home() {
   return (
@@ -98,17 +101,55 @@ function Home() {
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<Login />} />
 
+      <Route
+        path="/home"
+        element={
+          <ProtectedRoute allowedRole="user">
+            <Home />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/login" element={<Login />} />
-      
-      <Route path="/register" element={<Register />} /> 
 
-      <Route path="/report" element={<ReportIssue />} /> 
+      <Route path="/register" element={<Register />} />
 
-      <Route path="/track" element={<TrackComplaint />} /> 
+      <Route
+        path="/report"
+        element={
+          <ProtectedRoute allowedRole="user">
+            <ReportIssue />
+          </ProtectedRoute>
+        }
+      />
 
-      <Route path="/admin" element={<AdminDashboard />} />
+      <Route
+        path="/track"
+        element={
+          <ProtectedRoute allowedRole="user">
+            <TrackComplaint />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute allowedRole="admin">
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/department"
+        element={
+          <ProtectedRoute allowedRole="department">
+            <DepartmentDashboard />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }

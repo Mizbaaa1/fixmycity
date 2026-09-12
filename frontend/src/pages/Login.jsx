@@ -1,4 +1,52 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 function Login() {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch("http://localhost:5000/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setMessage(data.message);
+        return;
+      }
+
+      setMessage("Login successful!");
+
+      console.log("Logged in user:", data.user);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      if (data.user.role === "admin") {
+        navigate("/admin");
+      } else if (data.user.role === "department") {
+        navigate("/department");
+      } else {
+        navigate("/home");
+      }
+    } catch (error) {
+      console.error(error);
+      setMessage("Cannot connect to the backend.");
+    }
+  };
+
   return (
     <div className="login-page">
       <div className="login-card">
@@ -9,13 +57,17 @@ function Login() {
           Login to access your FixMyCity account.
         </p>
 
-        <form>
+        <form onSubmit={handleLogin}>
+
           <div className="form-group">
             <label>Email</label>
 
             <input
               type="email"
               placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
           </div>
 
@@ -25,17 +77,28 @@ function Login() {
             <input
               type="password"
               placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
 
           <button type="submit" className="login-submit">
             Login
           </button>
+
         </form>
 
-       <p className="register-text">
-         Don't have an account? <a href="/register">Register</a>
-       </p>
+        {message && (
+          <p>
+            {message}
+          </p>
+        )}
+
+        <p className="register-text">
+          Don't have an account?{" "}
+          <a href="/register">Register</a>
+        </p>
 
       </div>
     </div>

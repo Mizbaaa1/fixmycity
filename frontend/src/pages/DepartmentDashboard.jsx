@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function AdminDashboard() {
+function DepartmentDashboard() {
     const navigate = useNavigate();
     const [issues, setIssues] = useState([]);
     const [departments, setDepartments] = useState([]);
+    const [selectedDepartment, setSelectedDepartment] = useState("");
     const [loading, setLoading] = useState(true);
-
+    const [successMessage, setSuccessMessage] = useState("");
 
     useEffect(() => {
         fetch("http://localhost:5000/api/issues")
@@ -29,9 +30,17 @@ function AdminDashboard() {
                 console.error(error);
             });
     }, []);
+
+    const filteredIssues = selectedDepartment
+        ? issues.filter(
+            (issue) => issue.department === selectedDepartment
+        )
+        : issues;
+
     return (
         <div className="admin-page">
-            <h1>Admin Dashboard</h1>
+            <h1>Department Dashboard</h1>
+
             <button
                 onClick={() => {
                     localStorage.removeItem("user");
@@ -40,33 +49,62 @@ function AdminDashboard() {
             >
                 Logout
             </button>
-
             <p>
-                Manage and monitor civic complaints submitted through FixMyCity.
+                View complaints assigned to a department.
             </p>
+            {selectedDepartment && (
+                <h2>
+                    {
+                        departments.find(
+                            (department) => department._id === selectedDepartment
+                        )?.name
+                    }
+                </h2>
+            )}
+            {successMessage && (
+                <p>
+                    {successMessage}
+                </p>
+            )}
+
+            <select
+                value={selectedDepartment}
+                onChange={(e) => setSelectedDepartment(e.target.value)}
+            >
+                <option value="">All Departments</option>
+
+                {departments.map((department) => (
+                    <option key={department._id} value={department._id}>
+                        {department.name}
+                    </option>
+                ))}
+            </select>
 
             {loading && <p>Loading complaints...</p>}
 
-            {!loading && issues.length === 0 && (
-                <p>No complaints found.</p>
+            {!loading && filteredIssues.length === 0 && (
+                <p>No complaints assigned to this department.</p>
             )}
 
-            {!loading && issues.length > 0 && (
+            {!loading && filteredIssues.length > 0 && (
                 <div className="complaints-list">
-                    {issues.map((issue) => (
+                    {filteredIssues.map((issue) => (
                         <div className="complaint-card" key={issue._id}>
                             <h2>{issue.title}</h2>
 
                             <p>
-                                <strong>Complaint ID:</strong> {issue._id}
+                                <strong>Complaint ID:</strong>{" "}
+                                {issue._id}
                             </p>
 
                             <p>
-                                <strong>Category:</strong> {issue.category}
+                                <strong>Category:</strong>{" "}
+                                {issue.category}
                             </p>
 
                             <p>
-                                <strong>Description:</strong> {issue.description}
+                                <strong>Description:</strong>{" "}
+                                {issue.description}
                             </p>
 
                             <p>
@@ -105,6 +143,11 @@ function AdminDashboard() {
                                                     : currentIssue
                                             )
                                         );
+                                        setSuccessMessage("Complaint status updated successfully!");
+
+                                        setTimeout(() => {
+                                            setSuccessMessage("");
+                                        }, 3000);
                                     } catch (error) {
                                         console.error(error);
                                         alert("Failed to update complaint status.");
@@ -118,73 +161,18 @@ function AdminDashboard() {
                                 <option value="Resolved">Resolved</option>
                             </select>
 
-                            <p>
-                                <strong>Department:</strong>
-                            </p>
-
-                            <select
-                                value={issue.department || ""}
-                                onChange={async (e) => {
-                                    const departmentId = e.target.value;
-
-                                    try {
-                                        const response = await fetch(
-                                            `http://localhost:5000/api/issues/${issue._id}/department`,
-                                            {
-                                                method: "PUT",
-                                                headers: {
-                                                    "Content-Type": "application/json",
-                                                },
-                                                body: JSON.stringify({
-                                                    department: departmentId,
-                                                }),
-                                            }
-                                        );
-
-                                        if (!response.ok) {
-                                            throw new Error("Failed to assign department");
-                                        }
-
-                                        const data = await response.json();
-
-                                        setIssues((currentIssues) =>
-                                            currentIssues.map((currentIssue) =>
-                                                currentIssue._id === issue._id
-                                                    ? data.issue
-                                                    : currentIssue
-                                            )
-                                        );
-                                    } catch (error) {
-                                        console.error(error);
-                                        alert("Failed to assign department.");
-                                    }
-                                }}
-                            >
-                                <option value="">Select Department</option>
-
-                                {departments.map((department) => (
-                                    <option key={department._id} value={department._id}>
-                                        {department.name}
-                                    </option>
-                                ))}
-                            </select>
                             {issue.department && (
                                 <p>
-                                    <strong>Assigned Department:</strong>{" "}
+                                    <strong>Department:</strong>{" "}
                                     {
                                         departments.find(
-                                            (department) => department._id === issue.department
+                                            (department) =>
+                                                department._id ===
+                                                issue.department
                                         )?.name
                                     }
                                 </p>
                             )}
-
-                            <p>
-                                <strong>Submitted:</strong>{" "}
-                                {new Date(issue.createdAt).toLocaleString()}
-                            </p>
-
-
                         </div>
                     ))}
                 </div>
@@ -193,4 +181,4 @@ function AdminDashboard() {
     );
 }
 
-export default AdminDashboard;
+export default DepartmentDashboard;

@@ -32,6 +32,11 @@ const issueSchema = new mongoose.Schema(
       enum: ["Submitted", "Verified", "Assigned", "In Progress", "Resolved"],
       default: "Submitted",
     },
+    department: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Department",
+      default: null,
+    },
   },
   {
     timestamps: true,
