@@ -23,6 +23,11 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "admin", "department"],
       default: "user",
     },
+    department: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Department",
+      default: null,
+    },
   },
   {
     timestamps: true,

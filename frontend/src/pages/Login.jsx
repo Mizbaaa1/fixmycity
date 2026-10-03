@@ -5,10 +5,12 @@ function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
 
     try {
       const response = await fetch("http://localhost:5000/api/login", {
@@ -66,7 +68,22 @@ function Login() {
               type="email"
               placeholder="Enter your email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+
+                if (!e.target.value.includes("@")) {
+                  e.target.setCustomValidity(
+                    "Please include an '@' in the email address."
+                  );
+                } else if (!e.target.value.endsWith(".com")) {
+                  e.target.setCustomValidity(
+                    "Please include '.com' in the email address."
+                  );
+                } else {
+                  e.target.setCustomValidity("");
+                }
+              }}
+              autoComplete="off"
               required
             />
           </div>
@@ -74,13 +91,34 @@ function Login() {
           <div className="form-group">
             <label>Password</label>
 
-            <input
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div style={{ position: "relative" }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="new-password"
+                required
+                style={{ width: "100%", paddingRight: "45px" }}
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: "absolute",
+                  right: "10px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  border: "none",
+                  background: "none",
+                  cursor: "pointer",
+                  fontSize: "18px",
+                }}
+              >
+                {showPassword ? "🙈" : "👁️"}
+              </button>
+            </div>
           </div>
 
           <button type="submit" className="login-submit">

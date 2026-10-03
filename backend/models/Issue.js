@@ -26,6 +26,14 @@ const issueSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    photo: {
+      type: String,
+      default: null,
+    },
+    resolvedPhoto: {
+      type: String,
+      default: null,
+    },
 
     status: {
       type: String,

@@ -4,13 +4,15 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 
 import ReportIssue from "./pages/ReportIssue";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 import TrackComplaint from "./pages/TrackComplaint";
 import AdminDashboard from "./pages/AdminDashboard";
 import DepartmentDashboard from "./pages/DepartmentDashboard";
 
 function Home() {
+  const navigate = useNavigate();
+
   return (
     <>
       <Navbar />
@@ -27,11 +29,17 @@ function Home() {
           </p>
 
           <div className="button-group">
-            <button className="btn report-btn">
+            <button
+              className="btn report-btn"
+              onClick={() => navigate("/report")}
+            >
               Report an Issue
             </button>
 
-            <button className="btn login-btn">
+            <button
+              className="btn login-btn"
+              onClick={() => navigate("/login")}
+            >
               Login
             </button>
           </div>

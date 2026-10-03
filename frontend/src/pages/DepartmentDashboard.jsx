@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
+import "leaflet/dist/leaflet.css";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { useNavigate } from "react-router-dom";
 
 function DepartmentDashboard() {
     const navigate = useNavigate();
+    const user = JSON.parse(localStorage.getItem("user"));
     const [issues, setIssues] = useState([]);
     const [departments, setDepartments] = useState([]);
     const [selectedDepartment, setSelectedDepartment] = useState("");
@@ -10,7 +13,11 @@ function DepartmentDashboard() {
     const [successMessage, setSuccessMessage] = useState("");
 
     useEffect(() => {
-        fetch("http://localhost:5000/api/issues")
+        fetch("http://localhost:5000/api/issues", {
+            headers: {
+                "user-id": user.id,
+            },
+        })
             .then((response) => response.json())
             .then((data) => {
                 setIssues(data);
@@ -21,7 +28,11 @@ function DepartmentDashboard() {
                 setLoading(false);
             });
 
-        fetch("http://localhost:5000/api/departments")
+        fetch("http://localhost:5000/api/departments", {
+            headers: {
+                "user-id": user.id,
+            },
+        })
             .then((response) => response.json())
             .then((data) => {
                 setDepartments(data);
@@ -33,7 +44,7 @@ function DepartmentDashboard() {
 
     const filteredIssues = selectedDepartment
         ? issues.filter(
-            (issue) => issue.department === selectedDepartment
+            (issue) => String(issue.department) === String(selectedDepartment)
         )
         : issues;
 
@@ -71,7 +82,7 @@ function DepartmentDashboard() {
                 value={selectedDepartment}
                 onChange={(e) => setSelectedDepartment(e.target.value)}
             >
-                <option value="">All Departments</option>
+
 
                 {departments.map((department) => (
                     <option key={department._id} value={department._id}>
@@ -123,6 +134,7 @@ function DepartmentDashboard() {
                                                 method: "PUT",
                                                 headers: {
                                                     "Content-Type": "application/json",
+                                                    "user-id": user.id,
                                                 },
                                                 body: JSON.stringify({
                                                     status: newStatus,
@@ -172,6 +184,150 @@ function DepartmentDashboard() {
                                         )?.name
                                     }
                                 </p>
+                            )}
+                            {issue.photo && (
+                                <div>
+                                    <p>
+                                        <strong>Photo:</strong>
+                                    </p>
+
+                                    <img
+                                        src={`http://localhost:5000${issue.photo}`}
+                                        alt="Complaint evidence"
+                                        style={{
+                                            width: "300px",
+                                            maxHeight: "250px",
+                                            objectFit: "cover",
+                                            borderRadius: "8px",
+                                        }}
+                                    />
+                                </div>
+                            )}
+                            {issue.status === "Resolved" && (
+                                <div style={{ marginTop: "20px" }}>
+                                    <p>
+                                        <strong>📷 Upload Resolved Work Photo:</strong>
+                                    </p>
+
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={async (e) => {
+                                            const file = e.target.files[0];
+
+                                            if (!file) {
+                                                return;
+                                            }
+
+                                            try {
+                                                const formData = new FormData();
+                                                formData.append("resolvedPhoto", file);
+
+                                                const response = await fetch(
+                                                    `http://localhost:5000/api/issues/${issue._id}/resolved-photo`,
+                                                    {
+                                                        method: "PUT",
+                                                        headers: {
+                                                            "user-id": user.id,
+                                                        },
+                                                        body: formData,
+                                                    }
+                                                );
+
+                                                if (!response.ok) {
+                                                    throw new Error("Failed to upload resolved photo");
+                                                }
+
+                                                const data = await response.json();
+
+                                                setIssues((currentIssues) =>
+                                                    currentIssues.map((currentIssue) =>
+                                                        currentIssue._id === issue._id
+                                                            ? data.issue
+                                                            : currentIssue
+                                                    )
+                                                );
+
+                                                setSuccessMessage(
+                                                    "Resolved photo uploaded successfully!"
+                                                );
+
+                                                setTimeout(() => {
+                                                    setSuccessMessage("");
+                                                }, 3000);
+                                            } catch (error) {
+                                                console.error(error);
+                                                alert("Failed to upload resolved photo.");
+                                            }
+                                        }}
+                                    />
+
+                                    {issue.resolvedPhoto && (
+                                        <div style={{ marginTop: "10px" }}>
+                                            <p>
+                                                <strong>Resolved Work Photo:</strong>
+                                            </p>
+
+                                            <img
+                                                src={`http://localhost:5000${issue.resolvedPhoto}`}
+                                                alt="Resolved work"
+                                                style={{
+                                                    width: "300px",
+                                                    maxHeight: "250px",
+                                                    objectFit: "cover",
+                                                    borderRadius: "8px",
+                                                }}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                            {issue.latitude && issue.longitude && (
+                                <div style={{ marginTop: "20px" }}>
+                                    <p>
+                                        <strong>📍 Complaint Location:</strong>
+                                    </p>
+
+                                    <MapContainer
+                                        center={[issue.latitude, issue.longitude]}
+                                        zoom={15}
+                                        style={{
+                                            height: "300px",
+                                            width: "100%",
+                                            borderRadius: "10px",
+                                        }}
+                                    >
+                                        <TileLayer
+                                            attribution='&copy; OpenStreetMap contributors'
+                                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                        />
+
+                                        <Marker position={[issue.latitude, issue.longitude]}>
+                                            <Popup>
+                                                <strong>{issue.title}</strong>
+                                                <br />
+                                                Complaint Location
+                                            </Popup>
+                                        </Marker>
+                                    </MapContainer>
+
+                                    <a
+                                        href={`https://www.google.com/maps/dir/?api=1&destination=${issue.latitude},${issue.longitude}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{
+                                            display: "inline-block",
+                                            marginTop: "10px",
+                                            padding: "10px 15px",
+                                            backgroundColor: "#1976d2",
+                                            color: "white",
+                                            textDecoration: "none",
+                                            borderRadius: "6px",
+                                        }}
+                                    >
+                                        🧭 Get Directions
+                                    </a>
+                                </div>
                             )}
                         </div>
                     ))}

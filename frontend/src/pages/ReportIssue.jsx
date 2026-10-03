@@ -1,5 +1,4 @@
 import { useState } from "react";
-
 function ReportIssue() {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
@@ -8,6 +7,7 @@ function ReportIssue() {
 
   const [location, setLocation] = useState(null);
   const [locationMessage, setLocationMessage] = useState("");
+
 
   const [submitted, setSubmitted] = useState(false);
 
@@ -48,47 +48,50 @@ function ReportIssue() {
   };
 
   const handleSubmit = async (event) => {
-  event.preventDefault();
+    event.preventDefault();
 
-  if (!title || !category || !description) {
-    alert("Please fill in all required fields.");
-    return;
-  }
-
-  if (!location) {
-    alert("Please get your GPS location.");
-    return;
-  }
-
-  try {
-    const response = await fetch("http://127.0.0.1:5000/api/issues", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title: title,
-        category: category,
-        description: description,
-        latitude: location.latitude,
-        longitude: location.longitude,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      console.log("Backend response:", data);
-      setSubmitted(true);
-      alert("Civic issue submitted successfully!");
-    } else {
-      alert("Failed to submit the issue.");
+    if (!title || !category || !description) {
+      alert("Please fill in all required fields.");
+      return;
     }
-  } catch (error) {
-    console.error("Error:", error);
-    alert("Cannot connect to the backend.");
-  }
-};
+
+    if (!location) {
+      alert("Please get your GPS location.");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+
+      formData.append("title", title);
+      formData.append("category", category);
+      formData.append("description", description);
+      formData.append("latitude", location.latitude);
+      formData.append("longitude", location.longitude);
+
+      if (photo) {
+        formData.append("photo", photo);
+      }
+
+      const response = await fetch("http://127.0.0.1:5000/api/issues", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log("Backend response:", data);
+        setSubmitted(true);
+        alert("Civic issue submitted successfully!");
+      } else {
+        alert("Failed to submit the issue.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Cannot connect to the backend.");
+    }
+  };
   return (
     <div className="report-page">
       <div className="report-card">
@@ -183,15 +186,7 @@ function ReportIssue() {
 
             {location && (
               <div className="location-result">
-                <p>
-                  <strong>Latitude:</strong>{" "}
-                  {location.latitude}
-                </p>
-
-                <p>
-                  <strong>Longitude:</strong>{" "}
-                  {location.longitude}
-                </p>
+                <p>✅ Location captured successfully.</p>
               </div>
             )}
           </div>
@@ -207,6 +202,25 @@ function ReportIssue() {
                 setPhoto(event.target.files[0])
               }
             />
+
+            {photo && (
+              <div style={{ marginTop: "10px" }}>
+                <p>
+                  <strong>Selected Photo:</strong>
+                </p>
+
+                <img
+                  src={URL.createObjectURL(photo)}
+                  alt="Selected complaint"
+                  style={{
+                    width: "250px",
+                    maxHeight: "200px",
+                    objectFit: "cover",
+                    borderRadius: "8px",
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           {/* Submit */}
@@ -236,15 +250,6 @@ function ReportIssue() {
               <strong>Category:</strong> {category}
             </p>
 
-            <p>
-              <strong>Latitude:</strong>{" "}
-              {location.latitude}
-            </p>
-
-            <p>
-              <strong>Longitude:</strong>{" "}
-              {location.longitude}
-            </p>
 
             {photo && (
               <p>

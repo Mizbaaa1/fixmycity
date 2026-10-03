@@ -6,9 +6,16 @@ function TrackComplaint() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
+    const [locations, setLocations] = useState({});
 
     useEffect(() => {
-        fetch("http://localhost:5000/api/issues")
+        const user = JSON.parse(localStorage.getItem("user"));
+
+        fetch("http://localhost:5000/api/issues", {
+            headers: {
+                "user-id": user.id,
+            },
+        })
             .then((response) => {
                 if (!response.ok) {
                     throw new Error("Failed to fetch complaints");
@@ -17,6 +24,17 @@ function TrackComplaint() {
             })
             .then((data) => {
                 setIssues(data);
+
+                data.forEach((issue) => {
+                    if (issue.latitude && issue.longitude) {
+                        getLocationName(
+                            issue.latitude,
+                            issue.longitude,
+                            issue._id
+                        );
+                    }
+                });
+
                 setLoading(false);
             })
             .catch((error) => {
@@ -25,7 +43,27 @@ function TrackComplaint() {
                 setLoading(false);
             });
     }, []);
+    const getLocationName = async (latitude, longitude, issueId) => {
+        try {
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+            );
 
+            const data = await response.json();
+
+            setLocations((currentLocations) => ({
+                ...currentLocations,
+                [issueId]: data.display_name || "Location unavailable",
+            }));
+        } catch (error) {
+            console.error("Error getting location:", error);
+
+            setLocations((currentLocations) => ({
+                ...currentLocations,
+                [issueId]: "Location unavailable",
+            }));
+        }
+    };
     return (
         <div className="track-page">
             <h1>Track Complaints</h1>
@@ -94,58 +132,9 @@ function TrackComplaint() {
                                     <strong>Complaint ID:</strong> {issue._id}
                                 </p>
 
-                                <select
-                                    className={`status-select status-${issue.status
-                                        .toLowerCase()
-                                        .replace(" ", "-")}`}
-                                    value={issue.status}
-                                    onChange={async (e) => {
-                                        const newStatus = e.target.value;
-
-                                        try {
-                                            const response = await fetch(
-                                                `http://localhost:5000/api/issues/${issue._id}/status`,
-                                                {
-                                                    method: "PUT",
-                                                    headers: {
-                                                        "Content-Type": "application/json",
-                                                    },
-                                                    body: JSON.stringify({
-                                                        status: newStatus,
-                                                    }),
-                                                }
-                                            );
-
-                                            if (!response.ok) {
-                                                throw new Error("Failed to update status");
-                                            }
-
-                                            const data = await response.json();
-
-                                            setIssues((currentIssues) =>
-                                                currentIssues.map((currentIssue) =>
-                                                    currentIssue._id === issue._id
-                                                        ? data.issue
-                                                        : currentIssue
-                                                )
-                                            );
-                                            setSuccessMessage("Status updated successfully!");
-
-                                            setTimeout(() => {
-                                                setSuccessMessage("");
-                                            }, 3000);
-                                        } catch (error) {
-                                            console.error(error);
-                                            alert("Failed to update complaint status.");
-                                        }
-                                    }}
-                                >
-                                    <option value="Submitted">Submitted</option>
-                                    <option value="Verified">Verified</option>
-                                    <option value="Assigned">Assigned</option>
-                                    <option value="In Progress">In Progress</option>
-                                    <option value="Resolved">Resolved</option>
-                                </select>
+                                <p>
+                                    <strong>Status:</strong> {issue.status}
+                                </p>
                             </div>
                             <p>
                                 <strong>Category:</strong> {issue.category}
@@ -156,21 +145,31 @@ function TrackComplaint() {
                             </p>
 
                             <p>
-                                <strong>Location:</strong>
+                                <strong>📍 Location:</strong>{" "}
+                                {locations[issue._id] || "Getting location..."}
                             </p>
-
-                            <p>
-                                Latitude: {issue.latitude}
-                            </p>
-
-                            <p>
-                                Longitude: {issue.longitude}
-                            </p>
-
                             <p>
                                 <strong>Submitted:</strong>{" "}
                                 {new Date(issue.createdAt).toLocaleString()}
                             </p>
+                            {issue.status === "Resolved" && issue.resolvedPhoto && (
+                                <div style={{ marginTop: "20px" }}>
+                                    <p>
+                                        <strong>📷 Resolved Work Photo:</strong>
+                                    </p>
+
+                                    <img
+                                        src={`http://localhost:5000${issue.resolvedPhoto}`}
+                                        alt="Resolved work"
+                                        style={{
+                                            width: "300px",
+                                            maxHeight: "250px",
+                                            objectFit: "cover",
+                                            borderRadius: "8px",
+                                        }}
+                                    />
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>

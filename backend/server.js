@@ -1,14 +1,29 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const multer = require("multer");
+const path = require("path");
 const Issue = require("./models/Issue");
 const Department = require("./models/Department");
 const User = require("./models/User");
 require("dotenv").config();
+const auth = require("./middleware/auth");
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, cb) {
+    const uniqueName = Date.now() + "-" + file.originalname;
+    cb(null, uniqueName);
+  }
+});
+
+const upload = multer({ storage: storage });
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 const PORT = 5000;
 
@@ -95,9 +110,12 @@ app.post("/api/login", async (req, res) => {
     });
   }
 });
-app.post("/api/issues", async (req, res) => {
+app.post("/api/issues", upload.single("photo"), async (req, res) => {
   try {
-    const issue = new Issue(req.body);
+    const issue = new Issue({
+      ...req.body,
+      photo: req.file ? `/uploads/${req.file.filename}` : null,
+    });
 
     const savedIssue = await issue.save();
 
@@ -117,22 +135,28 @@ app.post("/api/issues", async (req, res) => {
     });
   }
 });
-
-app.get("/api/issues", async (req, res) => {
+app.get("/api/issues", auth, async (req, res) => {
   try {
-    const issues = await Issue.find().sort({ createdAt: -1 });
+    let issues;
+
+    if (req.user.role === "department") {
+      issues = await Issue.find({
+        department: req.user.department,
+      }).sort({ createdAt: -1 });
+    } else {
+      issues = await Issue.find().sort({ createdAt: -1 });
+    }
 
     res.status(200).json(issues);
   } catch (error) {
     console.error("Error fetching issues:", error);
-
     res.status(500).json({
       message: "Failed to fetch issues.",
-      error: error.message
+      error: error.message,
     });
   }
 });
-app.put("/api/issues/:id/status", async (req, res) => {
+app.put("/api/issues/:id/status", auth, async (req, res) => {
   try {
     const { status } = req.body;
 
@@ -161,7 +185,7 @@ app.put("/api/issues/:id/status", async (req, res) => {
     });
   }
 });
-app.post("/api/departments", async (req, res) => {
+app.post("/api/departments", auth, async (req, res) => {
   try {
     const department = new Department(req.body);
 
@@ -195,7 +219,42 @@ app.get("/api/departments", async (req, res) => {
     });
   }
 });
-app.put("/api/issues/:id/department", async (req, res) => {
+app.put("/api/issues/:id/resolved-photo", auth, upload.single("resolvedPhoto"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        message: "Please upload a resolved photo."
+      });
+    }
+
+    const issue = await Issue.findByIdAndUpdate(
+      req.params.id,
+      {
+        resolvedPhoto: `/uploads/${req.file.filename}`,
+      },
+      { new: true }
+    );
+
+    if (!issue) {
+      return res.status(404).json({
+        message: "Complaint not found."
+      });
+    }
+
+    res.status(200).json({
+      message: "Resolved photo uploaded successfully!",
+      issue: issue
+    });
+  } catch (error) {
+    console.error("Error uploading resolved photo:", error);
+
+    res.status(500).json({
+      message: "Failed to upload resolved photo.",
+      error: error.message
+    });
+  }
+});
+app.put("/api/issues/:id/department", auth, async (req, res) => {
   try {
     const { department } = req.body;
 

@@ -1,15 +1,22 @@
 import { useEffect, useState } from "react";
+import "leaflet/dist/leaflet.css";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { useNavigate } from "react-router-dom";
 
 function AdminDashboard() {
     const navigate = useNavigate();
+    const user = JSON.parse(localStorage.getItem("user"));
     const [issues, setIssues] = useState([]);
     const [departments, setDepartments] = useState([]);
     const [loading, setLoading] = useState(true);
 
 
     useEffect(() => {
-        fetch("http://localhost:5000/api/issues")
+        fetch("http://localhost:5000/api/issues", {
+            headers: {
+                "user-id": user.id,
+            },
+        })
             .then((response) => response.json())
             .then((data) => {
                 setIssues(data);
@@ -20,7 +27,11 @@ function AdminDashboard() {
                 setLoading(false);
             });
 
-        fetch("http://localhost:5000/api/departments")
+        fetch("http://localhost:5000/api/departments", {
+            headers: {
+                "user-id": user.id,
+            },
+        })
             .then((response) => response.json())
             .then((data) => {
                 setDepartments(data);
@@ -85,6 +96,7 @@ function AdminDashboard() {
                                                 method: "PUT",
                                                 headers: {
                                                     "Content-Type": "application/json",
+                                                    "user-id": user.id,
                                                 },
                                                 body: JSON.stringify({
                                                     status: newStatus,
@@ -134,6 +146,7 @@ function AdminDashboard() {
                                                 method: "PUT",
                                                 headers: {
                                                     "Content-Type": "application/json",
+                                                    "user-id": user.id,
                                                 },
                                                 body: JSON.stringify({
                                                     department: departmentId,
@@ -178,7 +191,70 @@ function AdminDashboard() {
                                     }
                                 </p>
                             )}
+                            {issue.photo && (
+                                <div>
+                                    <p>
+                                        <strong>Photo:</strong>
+                                    </p>
 
+                                    <img
+                                        src={`http://localhost:5000${issue.photo}`}
+                                        alt="Complaint evidence"
+                                        style={{
+                                            width: "300px",
+                                            maxHeight: "250px",
+                                            objectFit: "cover",
+                                            borderRadius: "8px",
+                                        }}
+                                    />
+                                </div>
+                            )}
+                            {issue.latitude && issue.longitude && (
+                                <div style={{ marginTop: "20px" }}>
+                                    <p>
+                                        <strong>📍 Complaint Location:</strong>
+                                    </p>
+
+                                    <MapContainer
+                                        center={[issue.latitude, issue.longitude]}
+                                        zoom={15}
+                                        style={{
+                                            height: "300px",
+                                            width: "100%",
+                                            borderRadius: "10px",
+                                        }}
+                                    >
+                                        <TileLayer
+                                            attribution='&copy; OpenStreetMap contributors'
+                                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                        />
+
+                                        <Marker position={[issue.latitude, issue.longitude]}>
+                                            <Popup>
+                                                <strong>{issue.title}</strong>
+                                                <br />
+                                                Complaint Location
+                                            </Popup>
+                                        </Marker>
+                                    </MapContainer>
+                                    <a
+                                        href={`https://www.google.com/maps/dir/?api=1&destination=${issue.latitude},${issue.longitude}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{
+                                            display: "inline-block",
+                                            marginTop: "10px",
+                                            padding: "10px 15px",
+                                            backgroundColor: "#1976d2",
+                                            color: "white",
+                                            textDecoration: "none",
+                                            borderRadius: "6px",
+                                        }}
+                                    >
+                                        🧭 Get Directions
+                                    </a>
+                                </div>
+                            )}
                             <p>
                                 <strong>Submitted:</strong>{" "}
                                 {new Date(issue.createdAt).toLocaleString()}
