@@ -283,6 +283,46 @@ app.put("/api/issues/:id/department", auth, async (req, res) => {
     });
   }
 });
+app.get("/api/location", async (req, res) => {
+  try {
+    const { latitude, longitude } = req.query;
+
+    if (!latitude || !longitude) {
+      return res.status(400).json({
+        message: "Latitude and longitude are required.",
+      });
+    }
+
+    const response = await fetch(
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+    );
+
+    if (!response.ok) {
+      throw new Error(`Geocoding error: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    const locationParts = [
+      data.locality,
+      data.city,
+      data.principalSubdivision,
+      data.countryName,
+    ].filter(Boolean);
+
+    const locationName = [...new Set(locationParts)].join(", ");
+
+    res.json({
+      location: locationName || "Location unavailable",
+    });
+  } catch (error) {
+    console.error("Location lookup error:", error);
+
+    res.status(500).json({
+      message: "Unable to get location.",
+    });
+  }
+});
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Backend server running on http://localhost:${PORT}`);
 });

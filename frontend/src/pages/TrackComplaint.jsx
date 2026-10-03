@@ -46,14 +46,18 @@ function TrackComplaint() {
     const getLocationName = async (latitude, longitude, issueId) => {
         try {
             const response = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+                `http://localhost:5000/api/location?latitude=${latitude}&longitude=${longitude}`
             );
+
+            if (!response.ok) {
+                throw new Error("Failed to get location");
+            }
 
             const data = await response.json();
 
             setLocations((currentLocations) => ({
                 ...currentLocations,
-                [issueId]: data.display_name || "Location unavailable",
+                [issueId]: data.location || "Location unavailable",
             }));
         } catch (error) {
             console.error("Error getting location:", error);
